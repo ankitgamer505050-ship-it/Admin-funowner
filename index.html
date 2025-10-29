@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin</title>
+  <style>
+    :root{ --bg:#f8fafc; --card:#ffffff; --muted:#64748b; --accent:#3b82f6; --accent-2:#60a5fa; --danger:#ef4444; --success:#10b981; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;background:linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);color:#334155;padding:24px;display:flex;justify-content:center}
+    .wrap{width:100%;max-width:920px}
+    header{display:flex;gap:20px;align-items:center;margin-bottom:24px;flex-wrap:wrap}
+    .logo{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:24px;box-shadow:0 10px 25px rgba(59,130,246,0.15)}
+    header h1{margin:0;font-size:24px;font-weight:700}
+    header p{margin:0;color:var(--muted);font-size:14px}.grid{display:grid;grid-template-columns:1fr;gap:20px}
+.card{background:var(--card);border-radius:16px;padding:20px;box-shadow:0 10px 35px rgba(0,0,0,0.05);transition:transform .25s ease, box-shadow .25s ease}
+.card:hover{transform:translateY(-2px);box-shadow:0 20px 40px rgba(0,0,0,0.08)}
+
+label{display:block;font-size:14px;color:var(--muted);margin-bottom:8px;font-weight:500}
+input[type="text"], input[type="url"], textarea{width:100%;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;background:#fafbfc;outline:none;font-size:15px;transition:border-color .2s ease, box-shadow .2s ease}
+input:focus, textarea:focus{box-shadow:0 0 0 3px rgba(59,130,246,0.1);border-color:var(--accent)}
+
+.row{display:flex;gap:12px}
+.row .col{flex:1}
+.btn{padding:10px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:600;background:var(--accent);color:white;transition:background .2s ease, transform .1s ease}
+.btn:hover{background:#2563eb;transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(59,130,246,0.15)}
+.btn.ghost:hover{background:rgba(59,130,246,0.05)}
+.btn.small{padding:8px 12px;font-size:14px;border-radius:8px}
+.btn.danger{background:var(--danger);box-shadow:0 4px 12px rgba(239,68,68,0.15)}
+.btn.success{background:var(--success);box-shadow:0 4px 12px rgba(16,185,129,0.15)}
+
+.controls{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.search{display:flex;gap:8px;align-items:center;flex:1}
+.search input{padding:12px 16px;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+
+table{width:100%;border-collapse:collapse;font-size:15px}
+thead th{text-align:left;font-size:13px;color:var(--muted);padding:12px 12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+tbody td{padding:12px 10px;vertical-align:middle;border-top:1px solid #f1f5f9}
+tbody tr{background:#fafbfc;border-radius:12px;transition:transform .2s ease, box-shadow .2s ease}
+tbody tr:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.05)}
+
+.action-btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600;transition:background .2s ease}
+.action-btn.edit{background:#fef3c7;color:#d97706;border:1px solid rgba(217,119,6,0.1)}
+.action-btn.edit:hover{background:#fde68a}
+.action-btn.del{background:#fee2e2;color:#dc2626;border:1px solid rgba(220,38,38,0.1)}
+.action-btn.del:hover{background:#fecaca}
+
+/* inline saving indicator */
+.saving { display:inline-flex; gap:8px; align-items:center; font-size:13px; color:var(--muted) }
+.spinner { width:14px;height:14px;border-radius:50%;border:2px solid rgba(0,0,0,0.08);border-top-color:var(--accent-2);animation:spin .9s linear infinite }
+@keyframes spin { to { transform:rotate(360deg) } }
+.tick { width:16px;height:16px;border-radius:4px;background:var(--success);display:inline-block;box-shadow:0 6px 18px rgba(16,185,129,0.12) }
+
+.backdrop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:80}
+.backdrop.show{opacity:1;pointer-events:auto}
+.modal{width:420px;background:var(--card);padding:20px;border-radius:16px;transform:translateY(20px) scale(0.95);transition:all .3s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:0 25px 50px rgba(0,0,0,0.15)}
+.backdrop.show .modal{transform:none}
+
+.toast{position:fixed;left:24px;bottom:24px;background:#0f172a;color:white;padding:12px 16px;border-radius:12px;box-shadow:0 20px 45px rgba(0,0,0,0.2);opacity:0;transform:translateY(20px);transition:all .3s ease;z-index:90}
+.toast.show{opacity:1;transform:none}
+
+/* small screens */
+@media (max-width:768px){.wrap{padding:16px}.grid{gap:16px}.card{padding:16px}.controls{flex-direction:column}.search{width:100%}}
+
+.note { font-size:13px;color:var(--muted);margin-top:8px }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">F</div>
+      <div>
+        <h1>Admin</h1>
+        <p>MADE BY @FUN_786</p>
+      </div>
+      <div style="margin-left:auto;">
+        <label class="small">Database URL</label>
+        <input id="dbUrl" type="url" value="https://rajafunownet-default-rtdb.firebaseio.com" />
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- App Data -->
+      <section class="card" id="appDataCard">
+        <h3 style="margin:0 0 12px 0;font-size:20px;font-weight:600">App Data (data/data)</h3>
+
+        <div class="row">
+          <div class="col">
+            <label>Title (title1)</label>
+            <input id="title1" type="text" placeholder="Enter title">
+
+            <label style="margin-top:12px">Link</label>
+            <input id="link" type="url" placeholder="https://...">
+
+            <label style="margin-top:12px">Update flag (true / false)</label>
+            <input id="updateFlag" type="text" placeholder="true or false">
+
+            <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+              <button id="saveAppData" class="btn">Save Changes</button>
+              <button id="refreshAppData" class="btn ghost">Refresh</button>
+              <button id="clearDataBtn" class="btn ghost small danger">Clear Data</button>
+            </div>
+            <div class="note">Tip: use <strong>Refresh</strong> after external changes to avoid overwriting.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Users -->
+      <section class="card" id="usersCard">
+        <h3 style="margin:0 0 12px 0;font-size:20px;font-weight:600">Users</h3>
+        <div class="controls">
+          <div class="search">
+            <input id="searchInput" type="text" placeholder="Search users by key, mobile, or brand...">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input id="newMobile" placeholder="Mobile (e.g., 8801...)" type="text">
+            <input id="newBrand" placeholder="Brand (e.g., realme)" type="text">
+            <button id="useMobileAsKeyBtn" class="btn small ghost" title="Toggle using mobile as the node key">Use mobile as key: OFF</button>
+            <button id="addUser" class="btn small">Add User</button>
+          </div>
+        </div>
+
+        <div style="overflow:auto;max-height:420px;margin-top:12px;border-radius:12px">
+          <table id="usersTable" aria-live="polite">
+            <thead>
+              <tr>
+                <th style="width:20%">Key</th>
+                <th style="width:25%">Mobile</th>
+                <th style="width:20%">Brand</th>
+                <th style="width:20%">Time</th>
+                <th style="width:15%">Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap">
+          <button id="exportCsv" class="btn small">Export CSV</button>
+          <button id="deleteAllUsers" class="btn small ghost danger">Delete All Users</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="backdrop" id="backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle" style="margin:0 0 12px 0;font-size:18px">Confirm Action</h3>
+      <p id="modalBody" style="color:var(--muted);margin:0 0 16px 0;line-height:1.5">Are you sure you want to proceed?</p>
+      <div style="display:flex;gap:12px;justify-content:flex-end">
+        <button id="modalCancel" class="btn ghost small">Cancel</button>
+        <button id="modalConfirm" class="btn danger small">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  /* ---------- REST helpers ---------- */
+  const dbInput = document.getElementById('dbUrl');
+  function DB_URL(){ return dbInput.value.replace(/\/+$/,''); }
+
+  async function getJSON(path){
+    const url = DB_URL() + path + '.json';
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+  async function patchJSON(path,data){
+    const url = DB_URL() + path + '.json';
+    const res = await fetch(url, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+  async function postJSON(path,data){
+    const url = DB_URL() + path + '.json';
+    const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+  async function putJSON(path,data){
+    const url = DB_URL() + path + '.json';
+    const res = await fetch(url, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+  async function deleteJSON(path){
+    const url = DB_URL() + path + '.json';
+    const res = await fetch(url, { method:'DELETE' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+
+  /* ---------- Elements & state ---------- */
+  const titleEl = document.getElementById('title1'), linkEl = document.getElementById('link'), updateFlagEl = document.getElementById('updateFlag');
+  const refreshAppDataBtn = document.getElementById('refreshAppData'), saveAppDataBtn = document.getElementById('saveAppData');
+  const usersTbody = document.querySelector('#usersTable tbody');
+  const addUserBtn = document.getElementById('addUser');
+  const newMobile = document.getElementById('newMobile'), newBrand = document.getElementById('newBrand'), searchInput = document.getElementById('searchInput');
+  const exportCsvBtn = document.getElementById('exportCsv'), deleteAllBtn = document.getElementById('deleteAllUsers');
+  const clearDataBtn = document.getElementById('clearDataBtn');
+  const backdrop = document.getElementById('backdrop'), modalTitle = document.getElementById('modalTitle'), modalBody = document.getElementById('modalBody');
+  const modalCancel = document.getElementById('modalCancel'), modalConfirm = document.getElementById('modalConfirm');
+  const toastEl = document.getElementById('toast');
+  const useMobileAsKeyBtn = document.getElementById('useMobileAsKeyBtn');
+
+  let usersCache = {};
+  let useMobileAsKey = false;
+
+  /* ---------- Toast & Modal ---------- */
+  function showToast(msg, timeout=3000){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    setTimeout(()=> toastEl.classList.remove('show'), timeout);
+  }
+
+  function openModal(title, body, confirmText='Confirm', onConfirm){
+    modalTitle.textContent = title;
+    modalBody.textContent = body;
+    modalConfirm.textContent = confirmText;
+    backdrop.classList.add('show');
+    backdrop.setAttribute('aria-hidden','false');
+
+    const handler = async () => {
+      backdrop.classList.remove('show');
+      backdrop.setAttribute('aria-hidden','true');
+      modalConfirm.onclick = null;
+      modalCancel.onclick = null;
+      try { await onConfirm && onConfirm(); } catch(e){ showToast('Action error: '+ e.message); }
+    };
+    modalConfirm.onclick = handler;
+    modalCancel.onclick = ()=> { backdrop.classList.remove('show'); backdrop.setAttribute('aria-hidden','true'); modalConfirm.onclick = null; modalCancel.onclick = null; };
+  }
+
+  /* ---------- App Data ---------- */
+  document.getElementById('refreshAppData').addEventListener('click', loadAppData);
+  async function loadAppData(){
+    try{
+      const d = await getJSON('/data/data');
+      if(!d){ titleEl.value=''; linkEl.value=''; updateFlagEl.value='false'; showToast('No app data found'); return; }
+      titleEl.value = d.title1 || '';
+      linkEl.value = d.link || '';
+      updateFlagEl.value = d.update || 'false';
+      showToast('App data loaded');
+    } catch(e){ showToast('Load error: ' + e.message); }
+  }
+
+  document.getElementById('saveAppData').addEventListener('click', async ()=>{
+    const btn = document.getElementById('saveAppData');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    try{
+      await patchJSON('/data/data', { title1: titleEl.value, link: linkEl.value, update: String(updateFlagEl.value) });
+      btn.textContent = 'Saved';
+      showToast('App data saved');
+      setTimeout(()=> { btn.disabled=false; btn.textContent='Save Changes'; }, 900);
+    } catch(e){
+      btn.disabled=false; btn.textContent='Save Changes';
+      showToast('Save failed: '+ e.message);
+    }
+  });
+
+  /* ---------- Users ---------- */
+  addUserBtn.addEventListener('click', addUser);
+  useMobileAsKeyBtn.addEventListener('click', ()=>{
+    useMobileAsKey = !useMobileAsKey;
+    useMobileAsKeyBtn.textContent = 'Use mobile as key: ' + (useMobileAsKey ? 'ON' : 'OFF');
+    useMobileAsKeyBtn.classList.toggle('btn.success', useMobileAsKey);
+  });
+
+  async function loadUsers(){
+    try{
+      usersTbody.innerHTML = '<tr><td colspan="5" style="padding:24px;color:var(--muted);text-align:center">Loading users...</td></tr>';
+      const users = await getJSON('/Users');
+      usersCache = users || {};
+      renderUsers(usersCache);
+      showToast('Users loaded');
+    } catch(e){
+      usersTbody.innerHTML = '<tr><td colspan="5" style="padding:24px;color:var(--danger);text-align:center">Error: ' + e.message + '</td></tr>';
+    }
+  }
+
+  function renderUsers(usersObj){
+    usersTbody.innerHTML = '';
+    if(!usersObj || Object.keys(usersObj).length === 0){
+      usersTbody.innerHTML = '<tr><td colspan="5" style="padding:24px;color:var(--muted);text-align:center">No users found</td></tr>';
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    Object.keys(usersObj).forEach((key,i) => {
+      const u = usersObj[key] || {};
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-family:monospace;font-size:14px;font-weight:500;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${key}">${key}</td>
+        <td><div contenteditable="true" class="editable mobile" data-key="${key}" style="min-width:80px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid #e6eefb">${u.mobile || ''}</div></td>
+        <td><div contenteditable="true" class="editable brand" data-key="${key}" style="min-width:80px;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid #e6eefb">${u.brand || ''}</div></td>
+        <td style="color:var(--muted);font-size:14px">${u.time || ''}</td>
+        <td><div style="display:flex;gap:8px"><button class="action-btn edit" data-key="${key}">Save</button><button class="action-btn del" data-key="${key}">Delete</button></div></td>
+      `;
+      frag.appendChild(tr);
+      // small stagger reveal
+      tr.style.opacity = '0';
+      setTimeout(()=>{ tr.style.transition = 'opacity .28s ease, transform .28s ease'; tr.style.opacity='1'; tr.style.transform='translateY(0)'; }, 30 + i*12);
+    });
+    usersTbody.appendChild(frag);
+
+    // attach listeners (delegation could be used; here simple attach)
+    document.querySelectorAll('.action-btn.edit').forEach(b=>{
+      b.onclick = async (ev)=>{
+        const key = ev.currentTarget.getAttribute('data-key');
+        const rowMobile = document.querySelector(`.editable.mobile[data-key="${key}"]`);
+        const rowBrand = document.querySelector(`.editable.brand[data-key="${key}"]`);
+        const newMobileVal = rowMobile.textContent.trim();
+        const newBrandVal = rowBrand.textContent.trim();
+
+        // inline saving UI
+        const btn = ev.currentTarget;
+        btn.disabled = true;
+        const orig = btn.innerHTML;
+        btn.innerHTML = `<span class="saving"><span class="spinner" aria-hidden="true"></span><span>Saving</span></span>`;
+
+        try{
+          await patchJSON('/Users/' + encodeURIComponent(key), { mobile: newMobileVal, brand: newBrandVal });
+          btn.innerHTML = `<span class="tick" title="Saved"></span>`;
+          showToast('Saved ' + key, 1400);
+          setTimeout(()=> { btn.disabled=false; btn.innerHTML = 'Save'; loadUsers(); }, 700);
+        } catch(e){
+          btn.disabled = false;
+          btn.innerHTML = orig;
+          showToast('Update failed: ' + e.message);
+        }
+      };
+    });
+
+    document.querySelectorAll('.action-btn.del').forEach(b=>{
+      b.onclick = (ev)=>{
+        const key = ev.currentTarget.getAttribute('data-key');
+        openModal('Delete User', `Are you sure you want to delete user with key: ${key}? This cannot be undone.`, 'Delete', async ()=>{
+          try{
+            await deleteJSON('/Users/' + encodeURIComponent(key));
+            showToast('Deleted ' + key);
+            loadUsers();
+          } catch(e){
+            showToast('Delete failed: ' + e.message);
+          }
+        });
+      };
+    });
+
+    // keyboard: Enter blurs editable element to stop editing
+    document.querySelectorAll('.editable').forEach(el=>{
+      el.addEventListener('keydown', (ev)=>{
+        if(ev.key === 'Enter'){ ev.preventDefault(); el.blur(); }
+      });
+    });
+  }
+
+  async function addUser(){
+    const mobile = newMobile.value.trim();
+    const brand = newBrand.value.trim();
+
+    if(!mobile){
+      showToast('Please enter a mobile number');
+      newMobile.focus();
+      return;
+    }
+
+    // prepare payload
+    const obj = { mobile, brand: brand || '', time: new Date().toLocaleString() };
+
+    // disable ui while adding
+    addUserBtn.disabled = true; addUserBtn.textContent = 'Adding...';
+    try{
+      if(useMobileAsKey){
+        // put to /Users/<mobile>
+        await putJSON('/Users/' + encodeURIComponent(mobile), obj);
+        showToast('Added user (key='+mobile+')');
+      } else {
+        // push
+        const res = await postJSON('/Users', obj);
+        const newKey = res && res.name;
+        showToast('Added: ' + (newKey || 'ok'));
+      }
+      newMobile.value=''; newBrand.value='';
+      loadUsers();
+    } catch(e){
+      showToast('Add failed: ' + e.message);
+    } finally{
+      addUserBtn.disabled = false; addUserBtn.textContent = 'Add User';
+    }
+  }
+
+  /* ---------- Search ---------- */
+  searchInput.addEventListener('input', (ev)=>{
+    const q = ev.target.value.trim().toLowerCase();
+    if(!usersCache) return;
+    if(!q) return renderUsers(usersCache);
+    const filtered = {};
+    Object.keys(usersCache).forEach(k=>{
+      const u = usersCache[k] || {};
+      const hay = (k + ' ' + (u.mobile || '') + ' ' + (u.brand || '')).toLowerCase();
+      if(hay.includes(q)) filtered[k] = u;
+    });
+    renderUsers(filtered);
+  });
+
+  /* ---------- CSV Export ---------- */
+  exportCsvBtn.addEventListener('click', ()=>{
+    if(!usersCache || Object.keys(usersCache).length === 0){ showToast('No users to export'); return; }
+    const rows = [['key','mobile','brand','time']];
+    Object.keys(usersCache).forEach(k=>{
+      const u = usersCache[k] || {};
+      rows.push([k, (u.mobile||''), (u.brand||''), (u.time||'')]);
+    });
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'users_export.csv'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV exported');
+  });
+
+  /* ---------- Delete All Users ---------- */
+  deleteAllBtn.addEventListener('click', ()=>{
+    openModal('Delete All Users', 'This will permanently remove ALL users from /Users. This action cannot be undone.', 'Delete All', async ()=>{
+      try{
+        await deleteJSON('/Users');
+        showToast('All users deleted');
+        loadUsers();
+      } catch(e){
+        showToast('Delete all failed: ' + e.message);
+      }
+    });
+  });
+
+  /* ---------- Clear App Data ---------- */
+  document.getElementById('clearDataBtn').addEventListener('click', ()=>{
+    openModal('Clear App Data', 'This will remove all data under /data/data. Continue?', 'Clear', async ()=>{
+      try{
+        await deleteJSON('/data/data');
+        showToast('App data cleared');
+        loadAppData();
+      } catch(e){
+        showToast('Clear failed: ' + e.message);
+      }
+    });
+  });
+
+  /* ---------- Initial load ---------- */
+  // load immediately so UI is ready (you asked add/delete to work well)
+  loadAppData();
+  loadUsers();
+  </script>
+</body>
+</html>
